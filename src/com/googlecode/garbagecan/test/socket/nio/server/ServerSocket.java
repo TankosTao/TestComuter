@@ -1,5 +1,6 @@
 package com.googlecode.garbagecan.test.socket.nio.server;
 
+import javax.swing.*;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -33,11 +34,12 @@ public class ServerSocket
         logger = Logger.getLogger(MyServer.class.getName());
     }
 
-    ServerSocket(int port,String string)
+    ServerSocket(int port, JTextArea jTextArea)
     {
         Selector selector = null;
         ServerSocketChannel serverSocketChannel = null;
-
+        System.out.println("---------------Send_Server----------Ready——————————————————————");
+        jTextArea.append("Send_server_Ready"+"\n");
         try {
             selector = Selector.open();
             serverSocketChannel = ServerSocketChannel.open();
@@ -47,8 +49,10 @@ public class ServerSocket
             serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
             while (selector.select() > 0&&quit1) {
                 Iterator<SelectionKey> it = selector.selectedKeys().iterator();
+                jTextArea.append("Send_server_Ready_go"+"\n");
                 System.out.println("---------------Send_Server----------Readytofly——————————————————————");
                 while (it.hasNext()) {
+                    jTextArea.setText("");
 
                     SelectionKey readyKey = it.next();
                     it.remove();
@@ -56,22 +60,26 @@ public class ServerSocket
                     SocketChannel socketChannel = null;
                     try {
                         socketChannel = ((ServerSocketChannel) readyKey.channel()).accept();
-                        string = receiveData(socketChannel);
-                        logger.log(Level.INFO, string);
 
-                        if (check(string,";")) {
-                            String [] str=trim(string,";");
+                        info.setString(receiveData(socketChannel));
+jTextArea.append("receive:"+info.getString()+"\n");
+                        logger.log(Level.INFO, info.getString());
+
+
+                        if (check(info.getString(),";")) {
+                            String [] str=trim(info.getString(),";");
                             System.out.println("process1");
 
                             if (str[0].equals("1"))
                             {
                                 System.out.println("1");
-                                if (!string.isEmpty()) {
+                                if (!info.getString().isEmpty()) {
                                     File f = new File(filepath+str[1]);
                                     if (f.exists() && f.isFile())
                                     {
-                                        sendData(socketChannel, str[1]);
 
+                                        sendData(socketChannel, f.length()+";"+str[1]);
+jTextArea.append("send:"+str[1]+"\n");
                                     } else {
 
                                         logger.info("wrong info");
@@ -83,13 +91,14 @@ public class ServerSocket
                                 System.out.println("2");
                                 File f = new File(filepath+str[1]);
                                 if (f.exists()) {
-
+                                    jTextArea.append("senddata:\n"+"");
                                     sendData(socketChannel,"");
                                 }
-                                else {
+                                else
+                                    {
                                 System.out.println("I am here with str[1]  "+str[1]);
-                                    string=str[1];
-                                    sendData(socketChannel,str[1]);
+                                info.setString(str[1]);
+                               sendData(socketChannel,str[1]);
 
                                     //  receiveFile(socketChannel,new File(filepath+str[1]));
 
@@ -100,8 +109,9 @@ public class ServerSocket
                             {
                                 System.out.println("3");
                                 File f = new File(filepath+str[1]);
+                                System.out.println(filepath+str[1]);
                                 sendFile(socketChannel,new File(filepath+str[1]));
-                                //receiveFile();
+                                jTextArea.append("send:\n"+filepath+str[1]);
                             }
                             if (str[0].equals("4"))  //2==send
                             {
@@ -112,13 +122,14 @@ public class ServerSocket
                                 }
                                 else {
                                     sendData(socketChannel,str[1]);
+                                    jTextArea.append("senddata:"+str[1]);
                                 }
                                 //receiveFile();
                             }
                         }else
                         { System.out.println("Here i AM in receive");
 
-                            sendFile(socketChannel,new File(filepath+string));
+                            sendFile(socketChannel,new File(filepath+info.getString()));
 
                         }
                     }catch(Exception ex){
@@ -169,13 +180,13 @@ public class ServerSocket
             bytes = baos.toByteArray();
             string = new String(bytes);
         }catch(Exception ex){
-            logger.log(Level.SEVERE, "7", ex);
-        }finally {
-            try {
-                baos.close();
-            } catch(Exception ex) {
-                logger.log(Level.SEVERE, "8", ex);
-            }
+                logger.log(Level.SEVERE, "7", ex);
+            }finally {
+                try {
+                    baos.close();
+                } catch(Exception ex) {
+                    logger.log(Level.SEVERE, "8", ex);
+                }
         }
         return string;
     }
@@ -222,6 +233,7 @@ public class ServerSocket
     }
 
     private static void sendFile(SocketChannel socketChannel, File file) throws IOException {
+        System.out.println("Sending");
         FileInputStream fis = null;
         FileChannel channel = null;
         try {

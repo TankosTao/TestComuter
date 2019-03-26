@@ -1,5 +1,6 @@
 package com.googlecode.garbagecan.test.socket.nio.server;
 
+import javax.swing.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,7 +25,7 @@ public class MyServer {
 static 	private String filepa="C:\\Users\\TankOStao\\Desktop\\MyShare";
 	static private String filepath="C:\\Users\\TankOStao\\Desktop\\MyShare\\";
 	private final static Logger logger = Logger.getLogger(MyServer.class.getName());
-
+   private static String filel;
 	public static String[] trim(String character, String symbol){
 		//
 		return character.split(symbol);
@@ -36,55 +37,55 @@ static 	private String filepa="C:\\Users\\TankOStao\\Desktop\\MyShare";
 		if(result1 != -1){
 			System.out.println("字符串str中包含子串:"+result1);
 			return true;
-		}else{
+		}
+		else
+			{
 		return false;
 		}
 	}
 
 	public static void main(String[] args)
 	{
-		/*
-		InetAddress a= null;
-		try {
-			a = InetAddress.getLocalHost();
-            System.out.println(a.toString());
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
-
-String string="";
-		Thread t1 = getThread("传送服务",string);
-		Thread t2 = getThread("接收服务",string);
-
-		t1.start();
-		t2.start();
-
-
-		try {
-			t1.join();
-			t2.join();
-
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-*/
-		Myframe myframe=new Myframe();
+filecho();
 	}
 
-		private static Thread getThread(String name,String string)
-		{
-		return new Thread(name){
-			@Override
-			public void run() {
-				if(name.equals("传送服务")){
-				ServerSocket serverSocket=new ServerSocket(1991,string);}
-			else{
-				ClientSocket clientSocket=new ClientSocket(2666,string);
-			}
+ public static void filecho(){
+	 //初始化文件选择框
+	 JFileChooser fDialog = new JFileChooser();
+//设置文件选择框的标题
+	 fDialog.setDialogTitle("select a file as your exchange file");
+//弹出选择框
+	 fDialog.setFileSelectionMode(1);
+	 int returnVal = fDialog.showOpenDialog(null);
+// 如果是选择了文件
+	 if(JFileChooser.APPROVE_OPTION == returnVal){
+//打印出文件的路径，你可以修改位 把路径值 写到 textField 中
 
-		};
+		 filel=fDialog.getSelectedFile().toString();
+		 String newPath;
+		 newPath = filel.replaceAll("\\\\","\\\\\\\\");
+		 System.out.println(newPath);
+		 File file=new File(newPath);
+		 if(file.isDirectory())
+		 {
+			getFileName(new File(newPath), "");
+			filepath=newPath+"\\";
 
-	};}
+			 Myframe myframe=new Myframe(newPath);
+
+
+
+		 }
+		 else
+		 {
+			 JOptionPane.showMessageDialog(null, "Wrong", "This is not a directory", JOptionPane.ERROR_MESSAGE);
+		 }
+
+
+	 }
+ }
+
+
 	public static void  telld(String[] str)
     {
         Selector selector = null;
@@ -442,4 +443,39 @@ public static void ClientSend()
 			}
 		}
 	}
+
+
+
+		public static   void getFileName(File file, String c){
+			/**
+			 * 如果是文件夹,打印名称(带上制表符)
+			 */
+			if(file.isDirectory()){
+				System.out.println(c + file.getName());
+			}
+			/**
+			 * 获取所有子文件
+			 */
+			File[] files = file.listFiles();
+			for(File f : files){
+				/**
+				 * 首先加一个制表符
+				 */
+				String temp = c + "\t";
+				if(f.isDirectory()){
+					/**
+					 * 如果是文件夹,则进行递归
+					 */
+					getFileName(f, temp);
+				} else {
+					/**
+					 * 如果不是文件夹,则直接打印
+					 */
+					System.out.println(temp + f.getName());
+				}
+			}
+		}
+
+
+
 }

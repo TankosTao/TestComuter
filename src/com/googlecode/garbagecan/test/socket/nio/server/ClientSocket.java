@@ -1,5 +1,6 @@
 package com.googlecode.garbagecan.test.socket.nio.server;
 
+import javax.swing.*;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -15,7 +16,7 @@ public class ClientSocket
 {
     static 	private String filepa="C:\\Users\\TankOStao\\Desktop\\MyShare";
     static private String filepath="C:\\Users\\TankOStao\\Desktop\\MyShare\\";
-    public String string="1";
+
     Selector selector = null;
     ServerSocketChannel serverSocketChannel = null;
     private final static Logger logger;
@@ -33,11 +34,14 @@ public class ClientSocket
         logger = Logger.getLogger(MyServer.class.getName());
     }
 
-   ClientSocket(int port,String string)
+   ClientSocket(int port, String path, JTextArea jTextArea)
     {
+
+        filepath=path;
         Selector selector = null;
         ServerSocketChannel serverSocketChannel = null;
-
+jTextArea.append("Receive_Server_Ready\n");
+        System.out.println("---------------Receive_Server----------Ready——————————————————————");
         try {
             selector = Selector.open();
             serverSocketChannel = ServerSocketChannel.open();
@@ -45,10 +49,13 @@ public class ClientSocket
             serverSocketChannel.socket().setReuseAddress(true);
             serverSocketChannel.socket().bind(new InetSocketAddress(port));
             serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
-            while (selector.select() > 0&&quit1) {
+            while (selector.select() > 0) {
                 Iterator<SelectionKey> it = selector.selectedKeys().iterator();
+                jTextArea.append("Receice_server_ready_go\n");
+
                 System.out.println("---------------Receive_Server----------Readytofly——————————————————————");
-                while (it.hasNext()&&quit2) {
+                while (it.hasNext()) {
+                    jTextArea.setText("");
 
                     SelectionKey readyKey = it.next();
                     it.remove();
@@ -58,12 +65,12 @@ public class ClientSocket
                     try {
 
                         socketChannel = ((ServerSocketChannel) readyKey.channel()).accept();
-                        System.out.println(string);
-File f=new File(filepath+"1.jpg");
+
+File f=new File(filepath+"/"+info.getString());
 if (!f.exists())
     f.createNewFile();
                        receiveFile(socketChannel,f);
-
+jTextArea.append("!!!!!!!!reveive file!!!!!!!!!!!!\n");
                     }catch(Exception ex){
                         logger.log(Level.SEVERE, "1", ex);
                     } finally {
